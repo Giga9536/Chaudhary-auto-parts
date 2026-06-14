@@ -14,80 +14,51 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Noto Sans', Arial, sans-serif; background: #f1f5f9; min-height: 100vh; overscroll-behavior: none; }
-
-    /* Header */
     .header { background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%); padding: 20px 16px 56px; color: #fff; position: relative; }
     .header h1 { font-size: 22px; font-weight: 800; }
     .header p { font-size: 13px; opacity: 0.8; margin-top: 3px; }
-
-    /* Tab Nav */
     .tab-nav { position: sticky; top: 0; z-index: 100; background: #fff; box-shadow: 0 2px 8px #0001; margin: -36px 12px 0; border-radius: 14px; padding: 8px 6px; display: flex; gap: 4px; }
     .tab-btn { flex: 1; padding: 8px 2px; border: none; border-radius: 10px; background: transparent; color: #64748b; font-weight: 700; cursor: pointer; font-size: 10px; font-family: inherit; transition: all 0.2s; }
     .tab-btn.active { color: #fff; }
-
-    /* Content */
     .content { padding: 16px 12px 80px; }
-
-    /* Cards */
     .card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1.5px solid #e2e8f0; box-shadow: 0 1px 4px #0001; }
     .card-row { display: flex; justify-content: space-between; align-items: flex-start; }
-
-    /* Stats grid */
     .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .stat-card { background: #fff; border-radius: 10px; padding: 12px; text-align: center; }
     .stat-label { font-size: 11px; color: #64748b; margin-bottom: 2px; }
     .stat-val { font-size: 15px; font-weight: 800; }
     .stat-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-
-    /* Buttons */
     .btn { display: inline-block; padding: 10px 18px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
     .btn:active { opacity: 0.8; }
     .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
     .btn-outline { background: transparent !important; border: 2px solid; }
-
-    /* Modal */
     .modal-bg { position: fixed; inset: 0; background: #00000080; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
     .modal { background: #fff; border-radius: 16px; padding: 22px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px #0004; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
     .modal-title { font-size: 17px; font-weight: 800; color: #1e293b; }
     .close-btn { background: #f1f5f9; border: none; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 18px; color: #64748b; }
-
-    /* Inputs */
     .field { margin-bottom: 13px; }
     .field label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 5px; }
     .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; font-family: inherit; background: #f8fafc; color: #1e293b; }
     .field input:focus, .field select:focus { border-color: #7c3aed; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    /* Badge */
     .badge { display: inline-block; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; border: 1.5px solid; }
-
-    /* Payment toggle */
     .pay-toggle { display: flex; gap: 10px; }
     .pay-opt { flex: 1; padding: 10px; border-radius: 10px; border: 2px solid #e2e8f0; background: #f8fafc; font-weight: 700; cursor: pointer; font-size: 13px; font-family: inherit; transition: all 0.2s; }
-
-    /* Bar chart */
     .bar-wrap { display: flex; align-items: flex-end; gap: 5px; height: 90px; }
     .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
     .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
     .bar-label { font-size: 9px; color: #94a3b8; }
     .bar-amt { font-size: 8px; font-weight: 700; }
-
-    /* Empty */
     .empty { text-align: center; padding: 48px 24px; color: #94a3b8; }
     .empty-icon { font-size: 48px; margin-bottom: 10px; }
-
-    /* Image preview */
     .img-upload { border: 2px dashed #c7d2fe; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #f8fafc; }
     .img-upload img { max-height: 120px; border-radius: 8px; }
     .img-lightbox { position: fixed; inset: 0; background: #000c; z-index: 2000; display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
     .img-lightbox img { max-width: 95vw; max-height: 95vh; border-radius: 12px; }
-
-    /* Install banner */
     .install-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #1e40af; color: #fff; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 500; box-shadow: 0 -4px 20px #0003; }
     .install-banner p { font-size: 13px; font-weight: 600; }
     .install-banner small { font-size: 11px; opacity: 0.8; display: block; }
-
     .hidden { display: none !important; }
     .flex-end { display: flex; justify-content: flex-end; }
     .flex-gap { display: flex; gap: 10px; margin-top: 10px; }
@@ -98,7 +69,7 @@
 <body>
 
 <div class="header">
-  <h1>🏪 दुकान हिसाब</h1>
+  <h1>🏪 दुकान हिसाब <span style="font-size:12px; font-weight:normal; opacity:0.7;">v2.1</span></h1>
   <p>आपका पूरा हिसाब-किताब एक जगह</p>
 </div>
 
@@ -119,20 +90,27 @@
 <div id="modalContainer"></div>
 
 <script>
-// ── Storage helpers ──────────────────────────────────────────────────
+// ── Storage helpers (Bulletproof) ────────────────────────────────────
 const DB = {
-  get: k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch { return []; } },
-  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  get: k => { 
+    try { 
+        let data = JSON.parse(localStorage.getItem(k)); 
+        return Array.isArray(data) ? data : []; 
+    } catch { 
+        return []; 
+    } 
+  },
+  set: (k, v) => { 
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) { console.error('DB Error:', e); } 
+  }
 };
 const KEYS = { kharid: 'dk_kharid', bikri: 'dk_bikri', udhar: 'dk_udhar' };
 
-// ── Utils ────────────────────────────────────────────────────────────
 const fDate = iso => iso ? new Date(iso).toLocaleDateString('hi-IN', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
 const fMoney = n => '₹' + Number(n||0).toLocaleString('hi-IN');
 const uid = () => Date.now() + Math.random().toString(36).slice(2);
 const today = () => new Date().toISOString().slice(0,10);
 
-// ── Tabs config ──────────────────────────────────────────────────────
 const TABS = [
   { id:'kharid', label:'📦 खरीद', color:'#2563eb' },
   { id:'bikri',  label:'🛒 बिक्री', color:'#16a34a' },
@@ -172,7 +150,7 @@ function closeModal() {
   document.getElementById('modalContainer').innerHTML = '';
 }
 
-// ── KHARID (मल्टी-आइटम बिलिंग) ───────────────────────────────────────────────────
+// ── KHARID ───────────────────────────────────────────────────────────
 let _kharidImg = null;
 let _editKharidId = null;
 let kharidRowCount = 1;
@@ -248,8 +226,8 @@ function openKharidForm(id = null) {
   _editKharidId = id; 
   
   if (id) { 
-    // ✏️ EDIT MODE (सिंगल आइटम एडिट करने के लिए)
     let item = DB.get(KEYS.kharid).find(i => i.id === id); 
+    if(!item) return;
     _kharidImg = item.img || null; 
     showModal('kharid', 'खरीद अपडेट करें', `
       <div class="field"><label>सामान का नाम *</label><input id="k_saman" value="${item.saman}" /></div>
@@ -281,11 +259,10 @@ function openKharidForm(id = null) {
         <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
       </div>`);
   } else { 
-    // ➕ ADD MODE (मल्टी-आइटम बिलिंग के लिए)
     _kharidImg = null; 
     kharidRowCount = 1;
     showModal('kharid', 'नया खरीद बिल दर्ज करें', `
-      <div class="field"><label>सप्लायर / दुकान का नाम</label><input id="k_supplier" placeholder="सप्लायर का नाम (जैसे: B.K. Enterprises)" /></div>
+      <div class="field"><label>सप्लायर / दुकान का नाम</label><input id="k_supplier" placeholder="सप्लायर का नाम" /></div>
       <div class="grid2">
         <div class="field"><label>बिल नंबर</label><input id="k_billno" placeholder="INV-001" /></div>
         <div class="field"><label>तारीख</label><input id="k_tarikh" type="date" value="${today()}" /></div>
@@ -308,14 +285,14 @@ function openKharidForm(id = null) {
           </div>
       </div>
 
-      <button class="btn btn-sm btn-outline" style="width:100%; margin-bottom:15px; border-style:dashed; color:#475569;" onclick="addKharidRow()">+ एक और आइटम जोड़ें</button>
+      <button type="button" class="btn btn-sm btn-outline" style="width:100%; margin-bottom:15px; border-style:dashed; color:#475569;" onclick="addKharidRow()">+ एक और आइटम जोड़ें</button>
 
       <div style="font-weight:bold; text-align:right; margin-bottom:15px; font-size:18px; padding:10px; background:#eff6ff; border-radius:8px; border:1px solid #2563eb40;">
           कुल बिल: <span id="k_grand_total" style="color:#2563eb;">₹0.00</span>
       </div>
 
       <div class="field">
-        <label>बिल की फोटो अपलोड करें (एक बार)</label>
+        <label>बिल की फोटो अपलोड करें</label>
         <div class="img-upload" id="kImgBox" onclick="document.getElementById('kFileInput').click()">
           <div id="kImgPreview" style="color:#2563eb"><div style="font-size:28px">📷</div><div style="font-size:12px">पूरे बिल की फोटो लें या चुनें</div></div>
         </div>
@@ -324,8 +301,8 @@ function openKharidForm(id = null) {
       <div class="field"><label>नोट</label><input id="k_note" placeholder="बिल का विवरण..." /></div>
 
       <div class="flex-gap">
-        <button class="btn" style="background:#2563eb;color:#fff; flex:1;" onclick="saveKharidMulti()">बिल सेव करें</button>
-        <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
+        <button type="button" class="btn" style="background:#2563eb;color:#fff; flex:1;" onclick="saveKharidMulti()">बिल सेव करें</button>
+        <button type="button" class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
       </div>`);
   }
 }
@@ -344,7 +321,7 @@ function addKharidRow() {
         <div class="k-item-row" id="k_row_${kharidRowCount}" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0; position:relative;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम ${kharidRowCount}</span>
-                <button onclick="document.getElementById('k_row_${kharidRowCount}').remove(); calcKharidGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
+                <button type="button" onclick="document.getElementById('k_row_${kharidRowCount}').remove(); calcKharidGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
             </div>
             <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="k_saman" placeholder="जैसे: Bag, Flasher..." /></div>
             <div class="grid2" style="margin-bottom:8px;">
@@ -362,9 +339,10 @@ function addKharidRow() {
 function calcKharidRow(id) {
     const row = document.getElementById(`k_row_${id}`);
     if(!row) return;
-    const q = +row.querySelector('.k_qty').value || 0;
-    const r = +row.querySelector('.k_rate').value || 0;
-    row.querySelector('.k_kul').value = (q * r).toFixed(2);
+    const q = +(row.querySelector('.k_qty')?.value || 0);
+    const r = +(row.querySelector('.k_rate')?.value || 0);
+    const kulEl = row.querySelector('.k_kul');
+    if(kulEl) kulEl.value = (q * r).toFixed(2);
     calcKharidGrandTotal();
 }
 
@@ -373,85 +351,118 @@ function calcKharidGrandTotal() {
     document.querySelectorAll('.k_kul').forEach(input => {
         grandTotal += (+input.value || 0);
     });
-    document.getElementById('k_grand_total').innerText = '₹' + grandTotal.toFixed(2);
+    const el = document.getElementById('k_grand_total');
+    if(el) el.innerText = '₹' + grandTotal.toFixed(2);
 }
 
 function calcKharidSingle() {
-  const q = +document.getElementById('k_qty')?.value||0;
-  const r = +document.getElementById('k_rate')?.value||0;
-  if(q && r) document.getElementById('k_kul').value = (q*r).toFixed(2);
+  const q = +(document.getElementById('k_qty')?.value || 0);
+  const r = +(document.getElementById('k_rate')?.value || 0);
+  const el = document.getElementById('k_kul');
+  if(el) el.value = (q*r).toFixed(2);
 }
 
+// 🛡️ बुलेटप्रूफ सेव फंक्शन
 function saveKharidMulti() {
-    const supplier = document.getElementById('k_supplier').value.trim();
-    const billno = document.getElementById('k_billno').value.trim();
-    const tarikh = document.getElementById('k_tarikh').value;
-    const note = document.getElementById('k_note').value.trim();
+  try {
+      const supplierEl = document.getElementById('k_supplier');
+      const billnoEl = document.getElementById('k_billno');
+      const tarikhEl = document.getElementById('k_tarikh');
+      const noteEl = document.getElementById('k_note');
 
-    const rows = document.querySelectorAll('.k-item-row');
-    let itemsToSave = [];
+      const supplier = supplierEl ? supplierEl.value.trim() : '';
+      const billno = billnoEl ? billnoEl.value.trim() : '';
+      const tarikh = tarikhEl ? tarikhEl.value : today();
+      const note = noteEl ? noteEl.value.trim() : '';
 
-    rows.forEach(row => {
-        const saman = row.querySelector('.k_saman').value.trim();
-        const qty = row.querySelector('.k_qty').value.trim();
-        const unit = row.querySelector('.k_unit').value.trim();
-        const rate = row.querySelector('.k_rate').value.trim();
-        const kul = row.querySelector('.k_kul').value.trim();
+      const rows = document.querySelectorAll('.k-item-row');
+      let itemsToSave = [];
+      let hasEmptyError = false;
 
-        // 🟢 स्मार्ट फीचर: अगर कोई खाली रो (Row) मिल जाए, तो उसे छोड़ दो और आगे बढ़ो
-        if (!saman || !qty) {
-            return; 
-        }
-        
-        itemsToSave.push({ id: uid(), saman, supplier, qty, unit, rate, kul, tarikh, billno, note, img: _kharidImg });
-    });
+      rows.forEach(row => {
+          const samanEl = row.querySelector('.k_saman');
+          const qtyEl = row.querySelector('.k_qty');
+          const unitEl = row.querySelector('.k_unit');
+          const rateEl = row.querySelector('.k_rate');
+          const kulEl = row.querySelector('.k_kul');
 
-    // अगर सारे के सारे खाली निकले, तब ही एरर दिखाओ
-    if (itemsToSave.length === 0) {
-        alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
-        return; 
-    }
+          if (!samanEl || !qtyEl) return;
 
-    let items = DB.get(KEYS.kharid);
-    itemsToSave.forEach(item => items.unshift(item));
-    
-    DB.set(KEYS.kharid, items);
-    _kharidImg = null;
-    closeModal(); 
-    renderContent();
+          const saman = samanEl.value.trim();
+          const qty = qtyEl.value.trim();
+          const unit = unitEl ? unitEl.value.trim() : '';
+          const rate = rateEl ? rateEl.value.trim() : '';
+          const kul = kulEl ? kulEl.value.trim() : '';
+
+          // अगर रो पूरी तरह खाली है, तो उसे इग्नोर करें
+          if (saman === '' && qty === '') return;
+
+          // अगर आधा भरा है, तो एरर दिखाएं
+          if (saman === '' || qty === '') {
+              hasEmptyError = true;
+              return;
+          }
+          
+          itemsToSave.push({ id: uid(), saman, supplier, qty, unit, rate, kul, tarikh, billno, note, img: _kharidImg });
+      });
+
+      if (hasEmptyError) {
+          alert('कृपया जोड़ी गई सभी पंक्तियों (Rows) में सामान का नाम और मात्रा सही से भरें!');
+          return; 
+      }
+
+      if (itemsToSave.length === 0) {
+          alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
+          return; 
+      }
+
+      let items = DB.get(KEYS.kharid);
+      itemsToSave.forEach(item => items.unshift(item));
+      
+      DB.set(KEYS.kharid, items);
+      _kharidImg = null;
+      closeModal(); 
+      renderContent();
+  } catch (error) {
+      alert('सेव करते समय कोई तकनीकी समस्या आई है: ' + error.message);
+  }
 }
 
 function updateKharid() {
-  const saman = document.getElementById('k_saman').value.trim();
-  const qty = document.getElementById('k_qty').value.trim();
-  if (!saman || !qty) { alert('सामान का नाम और मात्रा जरूरी है'); return; }
-  
-  let items = DB.get(KEYS.kharid);
-  
-  const updatedItem = { 
-    id: _editKharidId, 
-    saman, 
-    supplier: document.getElementById('k_supplier').value, 
-    qty, 
-    unit: document.getElementById('k_unit').value, 
-    rate: document.getElementById('k_rate').value, 
-    kul: document.getElementById('k_kul').value, 
-    tarikh: document.getElementById('k_tarikh').value, 
-    billno: document.getElementById('k_billno').value, 
-    note: document.getElementById('k_note').value, 
-    img: _kharidImg 
-  };
+  try {
+      const saman = document.getElementById('k_saman')?.value.trim() || '';
+      const qty = document.getElementById('k_qty')?.value.trim() || '';
+      if (!saman || !qty) { alert('सामान का नाम और मात्रा जरूरी है'); return; }
+      
+      let items = DB.get(KEYS.kharid);
+      
+      const updatedItem = { 
+        id: _editKharidId, 
+        saman, 
+        supplier: document.getElementById('k_supplier')?.value || '', 
+        qty, 
+        unit: document.getElementById('k_unit')?.value || '', 
+        rate: document.getElementById('k_rate')?.value || '', 
+        kul: document.getElementById('k_kul')?.value || '', 
+        tarikh: document.getElementById('k_tarikh')?.value || today(), 
+        billno: document.getElementById('k_billno')?.value || '', 
+        note: document.getElementById('k_note')?.value || '', 
+        img: _kharidImg 
+      };
 
-  items = items.map(i => i.id === _editKharidId ? updatedItem : i);
-  
-  DB.set(KEYS.kharid, items);
-  _kharidImg = null;
-  _editKharidId = null;
-  closeModal(); 
-  renderContent();
+      items = items.map(i => i.id === _editKharidId ? updatedItem : i);
+      
+      DB.set(KEYS.kharid, items);
+      _kharidImg = null;
+      _editKharidId = null;
+      closeModal(); 
+      renderContent();
+  } catch (error) {
+      alert('अपडेट करते समय कोई तकनीकी समस्या आई है: ' + error.message);
+  }
 }
 
-// ── BIKRI (मल्टी-आइटम बिलिंग) ────────────────────────────────────────────────────────────
+// ── BIKRI ────────────────────────────────────────────────────────────
 let bikriRowCount = 1;
 
 function renderBikri() {
@@ -494,12 +505,12 @@ function renderBikri() {
 function openBikriForm() {
   bikriRowCount = 1;
   const kharidItems = DB.get(KEYS.kharid);
-  const uniqueSaman = [...new Set(kharidItems.map(i => i.saman))];
+  const uniqueSaman = [...new Set(kharidItems.map(i => i.saman).filter(Boolean))];
   const datalistHtml = `<datalist id="stock_list">${uniqueSaman.map(s => `<option value="${s}">`).join('')}</datalist>`;
 
   showModal('bikri','नया बिल दर्ज करें', `
     ${datalistHtml}
-    <div class="field"><label>ग्राहक / पार्टी का नाम</label><input id="b_grahak" placeholder="ग्राहक का नाम (जैसे: सुपर भाई)" /></div>
+    <div class="field"><label>ग्राहक / पार्टी का नाम</label><input id="b_grahak" placeholder="ग्राहक का नाम" /></div>
     
     <div id="b_items_container">
         <div class="b-item-row" id="b_row_1" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0;">
@@ -518,7 +529,7 @@ function openBikriForm() {
         </div>
     </div>
 
-    <button class="btn btn-sm btn-outline" style="width:100%; margin-bottom:15px; border-style:dashed; color:#475569;" onclick="addBikriRow()">+ एक और आइटम जोड़ें</button>
+    <button type="button" class="btn btn-sm btn-outline" style="width:100%; margin-bottom:15px; border-style:dashed; color:#475569;" onclick="addBikriRow()">+ एक और आइटम जोड़ें</button>
 
     <div style="font-weight:bold; text-align:right; margin-bottom:15px; font-size:18px; padding:10px; background:#f0fdf4; border-radius:8px; border:1px solid #16a34a40;">
         कुल बिल: <span id="b_grand_total" style="color:#16a34a;">₹0.00</span>
@@ -527,16 +538,16 @@ function openBikriForm() {
     <div class="field">
       <label>भुगतान का तरीका</label>
       <div class="pay-toggle">
-        <button class="pay-opt" id="po_naqad" style="border-color:#16a34a;background:#f0fdf4;color:#16a34a" onclick="selectPay('naqad')">💵 नकद</button>
-        <button class="pay-opt" id="po_udhar" onclick="selectPay('udhar')">📋 उधार</button>
+        <button type="button" class="pay-opt" id="po_naqad" style="border-color:#16a34a;background:#f0fdf4;color:#16a34a" onclick="selectPay('naqad')">💵 नकद</button>
+        <button type="button" class="pay-opt" id="po_udhar" onclick="selectPay('udhar')">📋 उधार</button>
       </div>
       <input type="hidden" id="b_bhugtan" value="naqad" />
     </div>
     <div class="field"><label>तारीख</label><input id="b_tarikh" type="date" value="${today()}" /></div>
     <div class="field"><label>नोट</label><input id="b_note" placeholder="बिल का विवरण..." /></div>
     <div class="flex-gap">
-      <button class="btn" style="background:#16a34a;color:#fff; flex:1;" onclick="saveBikriMulti()">बिल सेव करें</button>
-      <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
+      <button type="button" class="btn" style="background:#16a34a;color:#fff; flex:1;" onclick="saveBikriMulti()">बिल सेव करें</button>
+      <button type="button" class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
     </div>`);
 }
 
@@ -547,7 +558,7 @@ function addBikriRow() {
         <div class="b-item-row" id="b_row_${bikriRowCount}" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0; position:relative;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम ${bikriRowCount}</span>
-                <button onclick="document.getElementById('b_row_${bikriRowCount}').remove(); calcGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
+                <button type="button" onclick="document.getElementById('b_row_${bikriRowCount}').remove(); calcGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
             </div>
             <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Bag, Flasher..." /></div>
             <div class="grid2" style="margin-bottom:8px;">
@@ -565,9 +576,10 @@ function addBikriRow() {
 function calcBikriRow(id) {
     const row = document.getElementById(`b_row_${id}`);
     if(!row) return;
-    const q = +row.querySelector('.b_qty').value || 0;
-    const r = +row.querySelector('.b_rate').value || 0;
-    row.querySelector('.b_kul').value = (q * r).toFixed(2);
+    const q = +(row.querySelector('.b_qty')?.value || 0);
+    const r = +(row.querySelector('.b_rate')?.value || 0);
+    const kulEl = row.querySelector('.b_kul');
+    if(kulEl) kulEl.value = (q * r).toFixed(2);
     calcGrandTotal();
 }
 
@@ -576,74 +588,109 @@ function calcGrandTotal() {
     document.querySelectorAll('.b_kul').forEach(input => {
         grandTotal += (+input.value || 0);
     });
-    document.getElementById('b_grand_total').innerText = '₹' + grandTotal.toFixed(2);
+    const el = document.getElementById('b_grand_total');
+    if(el) el.innerText = '₹' + grandTotal.toFixed(2);
 }
 
 function selectPay(v) {
-  document.getElementById('b_bhugtan').value = v;
+  const el = document.getElementById('b_bhugtan');
+  if(el) el.value = v;
   const nEl = document.getElementById('po_naqad');
   const uEl = document.getElementById('po_udhar');
-  if(v==='naqad') { nEl.style.cssText='border-color:#16a34a;background:#f0fdf4;color:#16a34a'; uEl.style.cssText='border-color:#e2e8f0;background:#f8fafc;color:#64748b'; }
-  else { uEl.style.cssText='border-color:#d97706;background:#fffbeb;color:#d97706'; nEl.style.cssText='border-color:#e2e8f0;background:#f8fafc;color:#64748b'; }
+  if(v==='naqad') { 
+      if(nEl) nEl.style.cssText='border-color:#16a34a;background:#f0fdf4;color:#16a34a'; 
+      if(uEl) uEl.style.cssText='border-color:#e2e8f0;background:#f8fafc;color:#64748b'; 
+  } else { 
+      if(uEl) uEl.style.cssText='border-color:#d97706;background:#fffbeb;color:#d97706'; 
+      if(nEl) nEl.style.cssText='border-color:#e2e8f0;background:#f8fafc;color:#64748b'; 
+  }
 }
 
+// 🛡️ बुलेटप्रूफ सेव फंक्शन
 function saveBikriMulti() {
-    const grahak = document.getElementById('b_grahak').value.trim();
-    const bhugtan = document.getElementById('b_bhugtan').value;
-    const tarikh = document.getElementById('b_tarikh').value;
-    const note = document.getElementById('b_note').value.trim();
-    
-    const generatedBillNo = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+  try {
+      const grahakEl = document.getElementById('b_grahak');
+      const bhugtanEl = document.getElementById('b_bhugtan');
+      const tarikhEl = document.getElementById('b_tarikh');
+      const noteEl = document.getElementById('b_note');
 
-    const rows = document.querySelectorAll('.b-item-row');
-    let itemsToSave = [];
-    let kharidItems = DB.get(KEYS.kharid);
+      const grahak = grahakEl ? grahakEl.value.trim() : '';
+      const bhugtan = bhugtanEl ? bhugtanEl.value : 'naqad';
+      const tarikh = tarikhEl ? tarikhEl.value : today();
+      const note = noteEl ? noteEl.value.trim() : '';
+      
+      const generatedBillNo = 'INV-' + Math.floor(1000 + Math.random() * 9000);
 
-    rows.forEach(row => {
-        const saman = row.querySelector('.b_saman').value.trim();
-        const qty = row.querySelector('.b_qty').value.trim();
-        const unit = row.querySelector('.b_unit').value.trim();
-        const rate = row.querySelector('.b_rate').value.trim();
-        const kul = row.querySelector('.b_kul').value.trim();
+      const rows = document.querySelectorAll('.b-item-row');
+      let itemsToSave = [];
+      let kharidItems = DB.get(KEYS.kharid);
+      let hasEmptyError = false;
 
-        // 🟢 स्मार्ट फीचर: खाली रो को छोड़ दें
-        if (!saman || !qty) {
-            return;
-        }
-        
-        const saleQty = Number(qty);
-        let stockItem = kharidItems.find(k => k.saman.toLowerCase() === saman.toLowerCase());
-        
-        if (stockItem) {
-            let currentStock = Number(stockItem.qty);
-            if (currentStock < saleQty) {
-                if(!confirm(`चेतावनी: '${saman}' का स्टॉक केवल ${currentStock} बचे हैं! क्या आप फिर भी बेचना चाहते हैं?`)) {
-                    return; 
-                }
-            }
-            stockItem.qty = currentStock - saleQty;
-        } else {
-            if(!confirm(`'${saman}' स्टॉक में नहीं मिला। क्या आप फिर भी इसे बिल में जोड़ना चाहते हैं?`)) {
-                return; 
-            }
-        }
+      // For Loop इस्तेमाल किया गया है ताकि break/return सही से काम करे
+      for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          const samanEl = row.querySelector('.b_saman');
+          const qtyEl = row.querySelector('.b_qty');
+          const unitEl = row.querySelector('.b_unit');
+          const rateEl = row.querySelector('.b_rate');
+          const kulEl = row.querySelector('.b_kul');
 
-        itemsToSave.push({ id: uid(), bill_no: generatedBillNo, saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
-    });
+          if (!samanEl || !qtyEl) continue;
 
-    if (itemsToSave.length === 0) {
-        alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
-        return; 
-    }
+          const saman = samanEl.value.trim();
+          const qty = qtyEl.value.trim();
+          const unit = unitEl ? unitEl.value.trim() : '';
+          const rate = rateEl ? rateEl.value.trim() : '';
+          const kul = kulEl ? kulEl.value.trim() : '';
 
-    const bikriItems = DB.get(KEYS.bikri);
-    itemsToSave.forEach(item => bikriItems.unshift(item));
-    
-    DB.set(KEYS.bikri, bikriItems);
-    DB.set(KEYS.kharid, kharidItems); 
+          if (saman === '' && qty === '') continue;
 
-    closeModal(); 
-    renderContent();
+          if (saman === '' || qty === '') {
+              hasEmptyError = true;
+              break;
+          }
+          
+          const saleQty = Number(qty);
+          let stockItem = kharidItems.find(k => k.saman && k.saman.toLowerCase() === saman.toLowerCase());
+          
+          if (stockItem) {
+              let currentStock = Number(stockItem.qty);
+              if (currentStock < saleQty) {
+                  if(!confirm(`चेतावनी: '${saman}' का स्टॉक केवल ${currentStock} बचे हैं! क्या आप फिर भी बेचना चाहते हैं?`)) {
+                      return; 
+                  }
+              }
+              stockItem.qty = currentStock - saleQty;
+          } else {
+              if(!confirm(`'${saman}' स्टॉक में नहीं मिला। क्या आप फिर भी इसे बिल में जोड़ना चाहते हैं?`)) {
+                  return; 
+              }
+          }
+
+          itemsToSave.push({ id: uid(), bill_no: generatedBillNo, saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
+      }
+
+      if (hasEmptyError) {
+          alert('कृपया जोड़ी गई सभी पंक्तियों में सामान का नाम और मात्रा सही से भरें!');
+          return; 
+      }
+
+      if (itemsToSave.length === 0) {
+          alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
+          return; 
+      }
+
+      const bikriItems = DB.get(KEYS.bikri);
+      itemsToSave.forEach(item => bikriItems.unshift(item));
+      
+      DB.set(KEYS.bikri, bikriItems);
+      DB.set(KEYS.kharid, kharidItems); 
+
+      closeModal(); 
+      renderContent();
+  } catch (error) {
+      alert('बिक्री सेव करते समय कोई तकनीकी समस्या आई है: ' + error.message);
+  }
 }
 
 // ── UDHAR ────────────────────────────────────────────────────────────
@@ -693,36 +740,51 @@ function openUdharForm() {
     <div class="field"><label>वापसी की तारीख (अनुमानित)</label><input id="u_wdate" type="date" /></div>
     <div class="field"><label>नोट / सामान का विवरण</label><input id="u_note" placeholder="किस चीज़ का उधार..." /></div>
     <div class="flex-gap">
-      <button class="btn" style="background:#d97706;color:#fff" onclick="saveUdhar()">सेव करें</button>
-      <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
+      <button type="button" class="btn" style="background:#d97706;color:#fff" onclick="saveUdhar()">सेव करें</button>
+      <button type="button" class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
     </div>`);
 }
 
 function saveUdhar() {
-  const grahak=document.getElementById('u_grahak').value.trim(), rakam=document.getElementById('u_rakam').value;
-  if(!grahak||!rakam){alert('ग्राहक का नाम और राशि जरूरी है');return;}
-  const items=DB.get(KEYS.udhar);
-  items.unshift({id:uid(),grahak,rakam,tarikh:document.getElementById('u_tarikh').value,wapis_tarikh:document.getElementById('u_wdate').value,note:document.getElementById('u_note').value,baki:+rakam,wapsi:[]});
-  DB.set(KEYS.udhar,items); closeModal(); renderContent();
+  try {
+      const grahak=document.getElementById('u_grahak')?.value.trim();
+      const rakam=document.getElementById('u_rakam')?.value;
+      if(!grahak||!rakam){alert('ग्राहक का नाम और राशि जरूरी है');return;}
+      const items=DB.get(KEYS.udhar);
+      items.unshift({
+          id:uid(), grahak, rakam, 
+          tarikh:document.getElementById('u_tarikh')?.value || today(),
+          wapis_tarikh:document.getElementById('u_wdate')?.value || '',
+          note:document.getElementById('u_note')?.value || '',
+          baki:+rakam, wapsi:[]
+      });
+      DB.set(KEYS.udhar,items); 
+      closeModal(); 
+      renderContent();
+  } catch(e) { alert('त्रुटि: ' + e.message); }
 }
 
 function openWapsi(id) {
   showModal('wapsi','वापसी दर्ज करें',`
     <div class="field"><label>वापसी राशि (₹)</label><input id="w_rakam" type="number" placeholder="0" /></div>
     <div class="flex-gap">
-      <button class="btn" style="background:#16a34a;color:#fff" onclick="saveWapsi('${id}')">सेव करें</button>
-      <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
+      <button type="button" class="btn" style="background:#16a34a;color:#fff" onclick="saveWapsi('${id}')">सेव करें</button>
+      <button type="button" class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
     </div>`);
 }
 
 function saveWapsi(id) {
-  const amt=+document.getElementById('w_rakam').value;
-  if(!amt||amt<=0){alert('वापसी राशि डालें');return;}
-  const items=DB.get(KEYS.udhar).map(i => {
-    if(i.id!==id) return i;
-    return {...i, baki:Math.max(0,(i.baki||0)-amt), wapsi:[...(i.wapsi||[]),{amt,date:today()}]};
-  });
-  DB.set(KEYS.udhar,items); closeModal(); renderContent();
+  try {
+      const amt=+(document.getElementById('w_rakam')?.value || 0);
+      if(!amt||amt<=0){alert('वापसी राशि डालें');return;}
+      const items=DB.get(KEYS.udhar).map(i => {
+        if(i.id!==id) return i;
+        return {...i, baki:Math.max(0,(i.baki||0)-amt), wapsi:[...(i.wapsi||[]),{amt,date:today()}]};
+      });
+      DB.set(KEYS.udhar,items); 
+      closeModal(); 
+      renderContent();
+  } catch(e) { alert('त्रुटि: ' + e.message); }
 }
 
 // ── REPORT ───────────────────────────────────────────────────────────
@@ -777,23 +839,25 @@ function renderReport() {
 // ── Delete ────────────────────────────────────────────────────────────
 function delItem(type, id) {
   if(!confirm('क्या आप सच में इसे हटाना चाहते हैं?')) return;
-  const key = KEYS[type];
-  const items = DB.get(key);
+  try {
+      const key = KEYS[type];
+      const items = DB.get(key);
 
-  if (type === 'bikri') {
-      const saleItem = items.find(i => i.id === id);
-      if (saleItem) {
-          let kharidItems = DB.get(KEYS.kharid);
-          let stockItem = kharidItems.find(k => k.saman.toLowerCase() === saleItem.saman.toLowerCase());
-          if (stockItem) {
-              stockItem.qty = Number(stockItem.qty) + Number(saleItem.qty);
-              DB.set(KEYS.kharid, kharidItems); 
+      if (type === 'bikri') {
+          const saleItem = items.find(i => i.id === id);
+          if (saleItem) {
+              let kharidItems = DB.get(KEYS.kharid);
+              let stockItem = kharidItems.find(k => k.saman && k.saman.toLowerCase() === saleItem.saman.toLowerCase());
+              if (stockItem) {
+                  stockItem.qty = Number(stockItem.qty) + Number(saleItem.qty);
+                  DB.set(KEYS.kharid, kharidItems); 
+              }
           }
       }
-  }
 
-  DB.set(key, items.filter(i => i.id !== id));
-  renderContent();
+      DB.set(key, items.filter(i => i.id !== id));
+      renderContent();
+  } catch(e) { alert('डिलीट करते समय त्रुटि: ' + e.message); }
 }
 
 // ── Render ────────────────────────────────────────────────────────────
@@ -809,14 +873,22 @@ function renderContent() {
 let deferredPrompt=null;
 window.addEventListener('beforeinstallprompt', e=>{
   e.preventDefault(); deferredPrompt=e;
-  document.getElementById('installBanner').classList.remove('hidden');
+  const el = document.getElementById('installBanner');
+  if(el) el.classList.remove('hidden');
 });
 function installApp(){
   if(!deferredPrompt) return;
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('installBanner').classList.add('hidden'); });
+  deferredPrompt.userChoice.then(()=>{ 
+      deferredPrompt=null; 
+      const el = document.getElementById('installBanner');
+      if(el) el.classList.add('hidden'); 
+  });
 }
-window.addEventListener('appinstalled',()=>{ document.getElementById('installBanner').classList.add('hidden'); });
+window.addEventListener('appinstalled',()=>{ 
+    const el = document.getElementById('installBanner');
+    if(el) el.classList.add('hidden'); 
+});
 
 // ── Service Worker ────────────────────────────────────────────────────
 if('serviceWorker' in navigator) {
