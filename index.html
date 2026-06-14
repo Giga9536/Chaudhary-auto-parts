@@ -362,7 +362,22 @@ function calcKharidSingle() {
   if(el) el.value = (q*r).toFixed(2);
 }
 
-// 🛡️ बुलेटप्रूफ सेव फंक्शन
+// ✅ इमेज को compress करके छोटा करने का फंक्शन (storage बचाने के लिए)
+function compressImage(base64, maxWidth, quality, callback) {
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    let w = img.width, h = img.height;
+    if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/jpeg', quality));
+  };
+  img.onerror = () => callback(null);
+  img.src = base64;
+}
+
+// 🛡️ बुलेटप्रूफ सेव फंक्शन (FIXED)
 function saveKharidMulti() {
   try {
       const supplierEl = document.getElementById('k_supplier');
@@ -394,35 +409,57 @@ function saveKharidMulti() {
           const rate = rateEl ? rateEl.value.trim() : '';
           const kul = kulEl ? kulEl.value.trim() : '';
 
-          // अगर रो पूरी तरह खाली है, तो उसे इग्नोर करें
           if (saman === '' && qty === '') return;
 
-          // अगर आधा भरा है, तो एरर दिखाएं
           if (saman === '' || qty === '') {
               hasEmptyError = true;
               return;
           }
-          
-          itemsToSave.push({ id: uid(), saman, supplier, qty, unit, rate, kul, tarikh, billno, note, img: _kharidImg });
+
+          // ✅ FIX: img पहले null रखते हैं, बाद में सिर्फ पहले item में add करेंगे
+          itemsToSave.push({ id: uid(), saman, supplier, qty, unit, rate, kul, tarikh, billno, note, img: null });
       });
 
       if (hasEmptyError) {
           alert('कृपया जोड़ी गई सभी पंक्तियों (Rows) में सामान का नाम और मात्रा सही से भरें!');
-          return; 
+          return;
       }
 
       if (itemsToSave.length === 0) {
           alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
-          return; 
+          return;
       }
 
-      let items = DB.get(KEYS.kharid);
-      itemsToSave.forEach(item => items.unshift(item));
-      
-      DB.set(KEYS.kharid, items);
-      _kharidImg = null;
-      closeModal(); 
-      renderContent();
+      // ✅ FIX: इमेज compress करके सिर्फ पहले item में save करें
+      const doSave = (compressedImg) => {
+          if (itemsToSave.length > 0) itemsToSave[0].img = compressedImg;
+
+          let existingItems = DB.get(KEYS.kharid);
+          itemsToSave.forEach(item => existingItems.unshift(item));
+
+          try {
+              DB.set(KEYS.kharid, existingItems);
+          } catch (storageErr) {
+              // ✅ FIX: storage full हो तो इमेज हटाकर फिर save करें
+              itemsToSave.forEach(item => { item.img = null; });
+              existingItems = DB.get(KEYS.kharid);
+              itemsToSave.forEach(item => existingItems.unshift(item));
+              DB.set(KEYS.kharid, existingItems);
+              alert('⚠️ बिल की फोटो save नहीं हो सकी (storage भर गई है), लेकिन बाकी सारा डेटा save हो गया है।');
+          }
+
+          _kharidImg = null;
+          closeModal();
+          renderContent();
+      };
+
+      if (_kharidImg) {
+          // ✅ FIX: फोटो को 800px और 60% quality पर compress करके save करें
+          compressImage(_kharidImg, 800, 0.6, doSave);
+      } else {
+          doSave(null);
+      }
+
   } catch (error) {
       alert('सेव करते समय कोई तकनीकी समस्या आई है: ' + error.message);
   }
@@ -433,30 +470,43 @@ function updateKharid() {
       const saman = document.getElementById('k_saman')?.value.trim() || '';
       const qty = document.getElementById('k_qty')?.value.trim() || '';
       if (!saman || !qty) { alert('सामान का नाम और मात्रा जरूरी है'); return; }
-      
-      let items = DB.get(KEYS.kharid);
-      
-      const updatedItem = { 
-        id: _editKharidId, 
-        saman, 
-        supplier: document.getElementById('k_supplier')?.value || '', 
-        qty, 
-        unit: document.getElementById('k_unit')?.value || '', 
-        rate: document.getElementById('k_rate')?.value || '', 
-        kul: document.getElementById('k_kul')?.value || '', 
-        tarikh: document.getElementById('k_tarikh')?.value || today(), 
-        billno: document.getElementById('k_billno')?.value || '', 
-        note: document.getElementById('k_note')?.value || '', 
-        img: _kharidImg 
+
+      const doUpdate = (compressedImg) => {
+        const updatedItem = { 
+          id: _editKharidId, 
+          saman, 
+          supplier: document.getElementById('k_supplier')?.value || '', 
+          qty, 
+          unit: document.getElementById('k_unit')?.value || '', 
+          rate: document.getElementById('k_rate')?.value || '', 
+          kul: document.getElementById('k_kul')?.value || '', 
+          tarikh: document.getElementById('k_tarikh')?.value || today(), 
+          billno: document.getElementById('k_billno')?.value || '', 
+          note: document.getElementById('k_note')?.value || '', 
+          img: compressedImg
+        };
+        let items = DB.get(KEYS.kharid);
+        items = items.map(i => i.id === _editKharidId ? updatedItem : i);
+        try {
+          DB.set(KEYS.kharid, items);
+        } catch(storageErr) {
+          updatedItem.img = null;
+          items = items.map(i => i.id === _editKharidId ? updatedItem : i);
+          DB.set(KEYS.kharid, items);
+          alert('⚠️ बिल की फोटो save नहीं हो सकी (storage भर गई), बाकी डेटा save हो गया।');
+        }
+        _kharidImg = null;
+        _editKharidId = null;
+        closeModal();
+        renderContent();
       };
 
-      items = items.map(i => i.id === _editKharidId ? updatedItem : i);
-      
-      DB.set(KEYS.kharid, items);
-      _kharidImg = null;
-      _editKharidId = null;
-      closeModal(); 
-      renderContent();
+      if (_kharidImg && _kharidImg.startsWith('data:image')) {
+        compressImage(_kharidImg, 800, 0.6, doUpdate);
+      } else {
+        doUpdate(_kharidImg);
+      }
+
   } catch (error) {
       alert('अपडेट करते समय कोई तकनीकी समस्या आई है: ' + error.message);
   }
