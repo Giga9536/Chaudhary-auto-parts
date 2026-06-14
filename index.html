@@ -157,7 +157,6 @@ function switchTab(id) {
   renderContent();
 }
 
-// ── Modal ────────────────────────────────────────────────────────────
 function showModal(id, title, bodyHtml) {
   closeModal();
   document.getElementById('modalContainer').innerHTML = `
@@ -175,12 +174,13 @@ function closeModal() {
   document.getElementById('modalContainer').innerHTML = '';
 }
 
-// ── KHARID ───────────────────────────────────────────────────────────
+// ── KHARID (खरीद) ───────────────────────────────────────────────────
 let _kharidImg = null;
 let _editKharidId = null;
 
 function renderKharid() {
-  const items = DB.get(KEYS.kharid);
+  // तारीख के हिसाब से सॉर्टिंग (Sorting by Date)
+  const items = DB.get(KEYS.kharid).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total = items.reduce((s,i) => s + (+i.kul||0), 0);
   let html = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -241,27 +241,15 @@ function showKharidImg(id) {
   if(!item||!item.img) return;
   const lb = document.createElement('div');
   lb.className='img-lightbox';
-  lb.innerHTML=`
-    <button style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.7); color:#fff; border:2px solid #fff; border-radius:50%; width:40px; height:40px; font-size:24px; font-weight:bold; cursor:pointer; z-index:2001; display:flex; align-items:center; justify-content:center;">×</button>
-    <img src="${item.img}" style="position:relative; z-index:2000;" />
-  `;
-  lb.onclick = (e) => {
-    if (e.target === lb || e.target.tagName === 'BUTTON') lb.remove();
-  };
+  lb.innerHTML=`<button style="position:absolute; top:20px; right:20px; background:rgba(0,0,0,0.7); color:#fff; border:2px solid #fff; border-radius:50%; width:40px; height:40px; font-size:24px; font-weight:bold; cursor:pointer; z-index:2001; display:flex; align-items:center; justify-content:center;">×</button><img src="${item.img}" style="position:relative; z-index:2000;" />`;
+  lb.onclick = (e) => { if (e.target === lb || e.target.tagName === 'BUTTON') lb.remove(); };
   document.body.appendChild(lb);
 }
 
 function openKharidForm(id = null) {
   _editKharidId = id; 
   let item = null;
-  
-  if (id) {
-    item = DB.get(KEYS.kharid).find(i => i.id === id);
-    _kharidImg = item.img || null;
-  } else {
-    _kharidImg = null;
-  }
-
+  if (id) { item = DB.get(KEYS.kharid).find(i => i.id === id); _kharidImg = item.img || null; } else { _kharidImg = null; }
   showModal('kharid', id ? 'खरीद एडिट करें' : 'नई खरीद दर्ज करें', `
     <div class="field"><label>सामान का नाम *</label><input id="k_saman" placeholder="जैसे: बैटरी, स्पार्क प्लग..." value="${item ? item.saman : ''}" /></div>
     <div class="field"><label>सप्लायर / दुकान का नाम</label><input id="k_supplier" placeholder="सप्लायर का नाम" value="${item && item.supplier ? item.supplier : ''}" /></div>
@@ -296,10 +284,7 @@ function openKharidForm(id = null) {
 function handleKharidImg(e) {
   const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
-  reader.onload=ev=>{
-    _kharidImg=ev.target.result;
-    document.getElementById('kImgPreview').innerHTML=`<img src="${_kharidImg}" style="max-height:110px;border-radius:8px" />`;
-  };
+  reader.onload=ev=>{ _kharidImg=ev.target.result; document.getElementById('kImgPreview').innerHTML=`<img src="${_kharidImg}" style="max-height:110px;border-radius:8px" />`; };
   reader.readAsDataURL(file);
 }
 
@@ -313,39 +298,23 @@ function saveKharid() {
   const saman = document.getElementById('k_saman').value.trim();
   const qty = document.getElementById('k_qty').value.trim();
   if (!saman || !qty) { alert('सामान का नाम और मात्रा जरूरी है'); return; }
-  
   let items = DB.get(KEYS.kharid);
-  
   const newItemData = { 
-    id: _editKharidId || uid(), 
-    saman, 
-    supplier: document.getElementById('k_supplier').value, 
-    qty, 
-    unit: document.getElementById('k_unit').value, 
-    rate: document.getElementById('k_rate').value, 
-    kul: document.getElementById('k_kul').value, 
-    tarikh: document.getElementById('k_tarikh').value, 
-    billno: document.getElementById('k_billno').value, 
-    note: document.getElementById('k_note').value, 
-    img: _kharidImg 
+    id: _editKharidId || uid(), saman, supplier: document.getElementById('k_supplier').value, 
+    qty, unit: document.getElementById('k_unit').value, rate: document.getElementById('k_rate').value, 
+    kul: document.getElementById('k_kul').value, tarikh: document.getElementById('k_tarikh').value, 
+    billno: document.getElementById('k_billno').value, note: document.getElementById('k_note').value, img: _kharidImg 
   };
-
-  if (_editKharidId) {
-    items = items.map(i => i.id === _editKharidId ? newItemData : i);
-  } else {
-    items.unshift(newItemData);
-  }
-
-  DB.set(KEYS.kharid, items);
-  _kharidImg = null;
-  _editKharidId = null;
-  closeModal(); 
-  renderContent();
+  if (_editKharidId) { items = items.map(i => i.id === _editKharidId ? newItemData : i); } else { items.unshift(newItemData); }
+  DB.set(KEYS.kharid, items); _kharidImg = null; _editKharidId = null; closeModal(); renderContent();
 }
 
-// ── BIKRI ────────────────────────────────────────────────────────────
+// ── BIKRI (मल्टी-आइटम बिलिंग) ────────────────────────────────────────────────────────────
+let bikriRowCount = 1;
+
 function renderBikri() {
-  const items = DB.get(KEYS.bikri);
+  // तारीख के हिसाब से सॉर्टिंग
+  const items = DB.get(KEYS.bikri).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total = items.reduce((s,i)=>s+(+i.kul||0),0);
   const naqad = items.filter(i=>i.bhugtan==='naqad').reduce((s,i)=>s+(+i.kul||0),0);
   const udhar = items.filter(i=>i.bhugtan==='udhar').reduce((s,i)=>s+(+i.kul||0),0);
@@ -356,7 +325,7 @@ function renderBikri() {
       <div class="stat-card" style="border:1.5px solid #d9780630"><div class="stat-label">उधार</div><div class="stat-val" style="color:#d97706">${fMoney(udhar)}</div></div>
     </div>
     <div class="flex-end" style="margin-bottom:12px">
-      <button class="btn" style="background:#16a34a;color:#fff" onclick="openBikriForm()">+ नई बिक्री</button>
+      <button class="btn" style="background:#16a34a;color:#fff" onclick="openBikriForm()">+ नया बिल / बिक्री</button>
     </div>`;
   if (!items.length) html += `<div class="empty"><div class="empty-icon">🛒</div>अभी तक कोई बिक्री दर्ज नहीं की</div>`;
   else items.forEach(i => {
@@ -380,23 +349,39 @@ function renderBikri() {
   return html;
 }
 
-function openBikriForm(bhugtan='naqad') {
+function openBikriForm() {
+  bikriRowCount = 1;
   const kharidItems = DB.get(KEYS.kharid);
   const uniqueSaman = [...new Set(kharidItems.map(i => i.saman))];
   const datalistHtml = `<datalist id="stock_list">${uniqueSaman.map(s => `<option value="${s}">`).join('')}</datalist>`;
 
-  showModal('bikri','नई बिक्री दर्ज करें', `
+  showModal('bikri','नया बिल दर्ज करें', `
     ${datalistHtml}
-    <div class="field"><label>सामान का नाम *</label><input id="b_saman" list="stock_list" placeholder="जैसे: Amaron battery..." /></div>
-    <div class="field"><label>ग्राहक का नाम</label><input id="b_grahak" placeholder="ग्राहक का नाम" /></div>
-    <div class="grid2">
-      <div class="field"><label>मात्रा *</label><input id="b_qty" type="number" placeholder="0" oninput="calcBikri()" /></div>
-      <div class="field"><label>इकाई</label><input id="b_unit" placeholder="पीस, लीटर..." /></div>
+    <div class="field"><label>ग्राहक / पार्टी का नाम</label><input id="b_grahak" placeholder="ग्राहक का नाम (जैसे: सुपर भाई)" /></div>
+    
+    <div id="b_items_container">
+        <div class="b-item-row" id="b_row_1" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम 1</span>
+            </div>
+            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Amaron battery..." /></div>
+            <div class="grid2" style="margin-bottom:8px;">
+              <div class="field" style="margin-bottom:0;"><label>मात्रा *</label><input class="b_qty" type="number" placeholder="0" oninput="calcBikriRow(1)" /></div>
+              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="b_unit" placeholder="पीस, लीटर..." /></div>
+            </div>
+            <div class="grid2" style="margin-bottom:0;">
+              <div class="field" style="margin-bottom:0;"><label>दर (₹)</label><input class="b_rate" type="number" placeholder="0" oninput="calcBikriRow(1)" /></div>
+              <div class="field" style="margin-bottom:0;"><label>कुल (₹)</label><input class="b_kul" type="number" placeholder="0" readonly style="background:#e2e8f0;" /></div>
+            </div>
+        </div>
     </div>
-    <div class="grid2">
-      <div class="field"><label>दर (₹)</label><input id="b_rate" type="number" placeholder="0" oninput="calcBikri()" /></div>
-      <div class="field"><label>कुल राशि (₹)</label><input id="b_kul" type="number" placeholder="0" /></div>
+
+    <button class="btn btn-sm btn-outline" style="width:100%; margin-bottom:15px; border-style:dashed; color:#475569;" onclick="addBikriRow()">+ एक और आइटम जोड़ें</button>
+
+    <div style="font-weight:bold; text-align:right; margin-bottom:15px; font-size:18px; padding:10px; background:#f0fdf4; border-radius:8px; border:1px solid #16a34a40;">
+        कुल बिल: <span id="b_grand_total" style="color:#16a34a;">₹0.00</span>
     </div>
+
     <div class="field">
       <label>भुगतान का तरीका</label>
       <div class="pay-toggle">
@@ -406,11 +391,50 @@ function openBikriForm(bhugtan='naqad') {
       <input type="hidden" id="b_bhugtan" value="naqad" />
     </div>
     <div class="field"><label>तारीख</label><input id="b_tarikh" type="date" value="${today()}" /></div>
-    <div class="field"><label>नोट</label><input id="b_note" placeholder="अतिरिक्त जानकारी..." /></div>
+    <div class="field"><label>नोट</label><input id="b_note" placeholder="बिल का विवरण..." /></div>
     <div class="flex-gap">
-      <button class="btn" style="background:#16a34a;color:#fff" onclick="saveBikri()">सेव करें</button>
+      <button class="btn" style="background:#16a34a;color:#fff; flex:1;" onclick="saveBikriMulti()">बिल सेव करें</button>
       <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
     </div>`);
+}
+
+function addBikriRow() {
+    bikriRowCount++;
+    const container = document.getElementById('b_items_container');
+    const rowHtml = `
+        <div class="b-item-row" id="b_row_${bikriRowCount}" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0; position:relative;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम ${bikriRowCount}</span>
+                <button onclick="document.getElementById('b_row_${bikriRowCount}').remove(); calcGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
+            </div>
+            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Amaron battery..." /></div>
+            <div class="grid2" style="margin-bottom:8px;">
+              <div class="field" style="margin-bottom:0;"><label>मात्रा *</label><input class="b_qty" type="number" placeholder="0" oninput="calcBikriRow(${bikriRowCount})" /></div>
+              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="b_unit" placeholder="पीस, लीटर..." /></div>
+            </div>
+            <div class="grid2" style="margin-bottom:0;">
+              <div class="field" style="margin-bottom:0;"><label>दर (₹)</label><input class="b_rate" type="number" placeholder="0" oninput="calcBikriRow(${bikriRowCount})" /></div>
+              <div class="field" style="margin-bottom:0;"><label>कुल (₹)</label><input class="b_kul" type="number" placeholder="0" readonly style="background:#e2e8f0;" /></div>
+            </div>
+        </div>`;
+    container.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+function calcBikriRow(id) {
+    const row = document.getElementById(`b_row_${id}`);
+    if(!row) return;
+    const q = +row.querySelector('.b_qty').value || 0;
+    const r = +row.querySelector('.b_rate').value || 0;
+    row.querySelector('.b_kul').value = (q * r).toFixed(2);
+    calcGrandTotal();
+}
+
+function calcGrandTotal() {
+    let grandTotal = 0;
+    document.querySelectorAll('.b_kul').forEach(input => {
+        grandTotal += (+input.value || 0);
+    });
+    document.getElementById('b_grand_total').innerText = '₹' + grandTotal.toFixed(2);
 }
 
 function selectPay(v) {
@@ -421,62 +445,78 @@ function selectPay(v) {
   else { uEl.style.cssText='border-color:#d97706;background:#fffbeb;color:#d97706'; nEl.style.cssText='border-color:#e2e8f0;background:#f8fafc;color:#64748b'; }
 }
 
-function calcBikri() {
-  const q=+document.getElementById('b_qty')?.value||0, r=+document.getElementById('b_rate')?.value||0;
-  if(q&&r) document.getElementById('b_kul').value=(q*r).toFixed(2);
-}
+function saveBikriMulti() {
+    const grahak = document.getElementById('b_grahak').value.trim();
+    const bhugtan = document.getElementById('b_bhugtan').value;
+    const tarikh = document.getElementById('b_tarikh').value;
+    const note = document.getElementById('b_note').value.trim();
 
-function saveBikri() {
-  const saman = document.getElementById('b_saman').value.trim();
-  const qty = document.getElementById('b_qty').value.trim();
-  if(!saman || !qty){alert('सामान का नाम और मात्रा जरूरी है');return;}
+    const rows = document.querySelectorAll('.b-item-row');
+    let itemsToSave = [];
+    let kharidItems = DB.get(KEYS.kharid);
+    let hasError = false;
 
-  const saleQty = Number(qty);
-  let kharidItems = DB.get(KEYS.kharid);
-  let stockFound = false;
-  let stockItem = kharidItems.find(k => k.saman.toLowerCase() === saman.toLowerCase());
-  
-  if (stockItem) {
-      let currentStock = Number(stockItem.qty);
-      if (currentStock < saleQty) {
-          if(!confirm(`चेतावनी: स्टॉक में केवल ${currentStock} ${stockItem.unit || ''} बचे हैं! क्या आप फिर भी इसे बेचना चाहते हैं?`)) {
-              return; 
-          }
-      }
-      stockItem.qty = currentStock - saleQty;
-      stockFound = true;
-  } else {
-      if(!confirm(`'${saman}' आपके खरीद स्टॉक में नहीं मिला। क्या आप फिर भी इसकी बिक्री दर्ज करना चाहते हैं?`)) {
-          return;
-      }
-  }
+    rows.forEach(row => {
+        const saman = row.querySelector('.b_saman').value.trim();
+        const qty = row.querySelector('.b_qty').value.trim();
+        const unit = row.querySelector('.b_unit').value.trim();
+        const rate = row.querySelector('.b_rate').value.trim();
+        const kul = row.querySelector('.b_kul').value.trim();
 
-  const items = DB.get(KEYS.bikri);
-  items.unshift({
-    id: uid(),
-    saman,
-    grahak: document.getElementById('b_grahak').value,
-    qty: saleQty,
-    unit: document.getElementById('b_unit').value,
-    rate: document.getElementById('b_rate').value,
-    kul: document.getElementById('b_kul').value,
-    bhugtan: document.getElementById('b_bhugtan').value,
-    tarikh: document.getElementById('b_tarikh').value,
-    note: document.getElementById('b_note').value
-  });
-  DB.set(KEYS.bikri, items);
+        if (!saman || !qty) {
+            hasError = true;
+            return;
+        }
+        
+        const saleQty = Number(qty);
+        let stockFound = false;
+        let stockItem = kharidItems.find(k => k.saman.toLowerCase() === saman.toLowerCase());
+        
+        if (stockItem) {
+            let currentStock = Number(stockItem.qty);
+            if (currentStock < saleQty) {
+                if(!confirm(`चेतावनी: '${saman}' का स्टॉक केवल ${currentStock} बचे हैं! क्या आप फिर भी बेचना चाहते हैं?`)) {
+                    hasError = true;
+                    return;
+                }
+            }
+            stockItem.qty = currentStock - saleQty;
+            stockFound = true;
+        } else {
+            if(!confirm(`'${saman}' स्टॉक में नहीं मिला। क्या आप फिर भी दर्ज करना चाहते हैं?`)) {
+                hasError = true;
+                return;
+            }
+        }
 
-  if (stockFound) {
-      DB.set(KEYS.kharid, kharidItems);
-  }
+        itemsToSave.push({ id: uid(), saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
+    });
 
-  closeModal(); 
-  renderContent();
+    if (hasError) {
+        if (itemsToSave.length === 0) alert('कृपया सभी सामान का नाम और मात्रा सही से भरें।');
+        return; 
+    }
+
+    if (itemsToSave.length === 0) {
+        alert('कम से कम एक आइटम जोड़ें!');
+        return;
+    }
+
+    const bikriItems = DB.get(KEYS.bikri);
+    // सभी आइटम्स को सेव करना
+    itemsToSave.forEach(item => bikriItems.unshift(item));
+    
+    DB.set(KEYS.bikri, bikriItems);
+    DB.set(KEYS.kharid, kharidItems); // स्टॉक अपडेट
+
+    closeModal(); 
+    renderContent();
 }
 
 // ── UDHAR ────────────────────────────────────────────────────────────
 function renderUdhar() {
-  const items = DB.get(KEYS.udhar);
+  // तारीख के हिसाब से सॉर्टिंग
+  const items = DB.get(KEYS.udhar).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total=items.reduce((s,i)=>s+(+i.rakam||0),0);
   const baki=items.reduce((s,i)=>s+(i.baki||0),0);
   const mila=total-baki;
@@ -648,7 +688,7 @@ window.addEventListener('appinstalled',()=>{ document.getElementById('installBan
 
 // ── Service Worker ────────────────────────────────────────────────────
 if('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('/Chaudhary-auto-parts/sw.js').catch(()=>{});
 }
 
 // ── Init ──────────────────────────────────────────────────────────────
