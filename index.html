@@ -93,7 +93,6 @@
     .flex-gap { display: flex; gap: 10px; margin-top: 10px; }
     .mt4 { margin-top: 4px; }
     .mt6 { margin-top: 6px; }
-    .red { color: #ef4444; }
   </style>
 </head>
 <body>
@@ -104,7 +103,6 @@
 </div>
 
 <div class="tab-nav" id="tabNav"></div>
-
 <div class="content" id="appContent"></div>
 
 <div class="install-banner hidden" id="installBanner">
@@ -179,7 +177,7 @@ let _kharidImg = null;
 let _editKharidId = null;
 
 function renderKharid() {
-  // तारीख के हिसाब से सॉर्टिंग (Sorting by Date)
+  // तारीख के हिसाब से सॉर्टिंग (आज की डेट सबसे ऊपर)
   const items = DB.get(KEYS.kharid).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total = items.reduce((s,i) => s + (+i.kul||0), 0);
   let html = `
@@ -325,7 +323,7 @@ function renderBikri() {
       <div class="stat-card" style="border:1.5px solid #d9780630"><div class="stat-label">उधार</div><div class="stat-val" style="color:#d97706">${fMoney(udhar)}</div></div>
     </div>
     <div class="flex-end" style="margin-bottom:12px">
-      <button class="btn" style="background:#16a34a;color:#fff" onclick="openBikriForm()">+ नया बिल / बिक्री</button>
+      <button class="btn" style="background:#16a34a;color:#fff; padding:12px 20px; font-size:15px; width:100%;" onclick="openBikriForm()">+ नया बिल / बिक्री दर्ज करें</button>
     </div>`;
   if (!items.length) html += `<div class="empty"><div class="empty-icon">🛒</div>अभी तक कोई बिक्री दर्ज नहीं की</div>`;
   else items.forEach(i => {
@@ -336,6 +334,7 @@ function renderBikri() {
           <div style="font-weight:700;font-size:16px;color:#1e293b">${i.saman}</div>
           ${i.grahak?`<div style="font-size:13px;color:#64748b">👤 ${i.grahak}</div>`:''}
           <div style="font-size:13px;color:#64748b" class="mt4">${i.qty} ${i.unit||''} ${i.rate?`× ₹${i.rate}`:''}</div>
+          ${i.bill_no?`<div style="font-size:12px;color:#7c3aed;margin-top:4px;font-weight:600;">🧾 बिल नं: ${i.bill_no}</div>`:''}
           <div class="mt4"><span class="badge" style="color:${bc};border-color:${bc};background:${bc}20">${i.bhugtan==='naqad'?'नकद':'उधार'}</span></div>
         </div>
         <div style="text-align:right">
@@ -364,10 +363,10 @@ function openBikriForm() {
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                 <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम 1</span>
             </div>
-            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Amaron battery..." /></div>
+            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Foot rest..." /></div>
             <div class="grid2" style="margin-bottom:8px;">
               <div class="field" style="margin-bottom:0;"><label>मात्रा *</label><input class="b_qty" type="number" placeholder="0" oninput="calcBikriRow(1)" /></div>
-              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="b_unit" placeholder="पीस, लीटर..." /></div>
+              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="b_unit" placeholder="पीस, पैकेट..." /></div>
             </div>
             <div class="grid2" style="margin-bottom:0;">
               <div class="field" style="margin-bottom:0;"><label>दर (₹)</label><input class="b_rate" type="number" placeholder="0" oninput="calcBikriRow(1)" /></div>
@@ -407,10 +406,10 @@ function addBikriRow() {
                 <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम ${bikriRowCount}</span>
                 <button onclick="document.getElementById('b_row_${bikriRowCount}').remove(); calcGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
             </div>
-            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Amaron battery..." /></div>
+            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="b_saman" list="stock_list" placeholder="जैसे: Bag, Flasher..." /></div>
             <div class="grid2" style="margin-bottom:8px;">
               <div class="field" style="margin-bottom:0;"><label>मात्रा *</label><input class="b_qty" type="number" placeholder="0" oninput="calcBikriRow(${bikriRowCount})" /></div>
-              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="b_unit" placeholder="पीस, लीटर..." /></div>
+              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="b_unit" placeholder="पीस, पैकेट..." /></div>
             </div>
             <div class="grid2" style="margin-bottom:0;">
               <div class="field" style="margin-bottom:0;"><label>दर (₹)</label><input class="b_rate" type="number" placeholder="0" oninput="calcBikriRow(${bikriRowCount})" /></div>
@@ -450,6 +449,9 @@ function saveBikriMulti() {
     const bhugtan = document.getElementById('b_bhugtan').value;
     const tarikh = document.getElementById('b_tarikh').value;
     const note = document.getElementById('b_note').value.trim();
+    
+    // एक नया ऑटोमैटिक बिल नंबर जनरेट करना
+    const generatedBillNo = 'INV-' + Math.floor(1000 + Math.random() * 9000);
 
     const rows = document.querySelectorAll('.b-item-row');
     let itemsToSave = [];
@@ -483,13 +485,14 @@ function saveBikriMulti() {
             stockItem.qty = currentStock - saleQty;
             stockFound = true;
         } else {
-            if(!confirm(`'${saman}' स्टॉक में नहीं मिला। क्या आप फिर भी दर्ज करना चाहते हैं?`)) {
+            if(!confirm(`'${saman}' स्टॉक में नहीं मिला। क्या आप फिर भी इसे बिल में जोड़ना चाहते हैं?`)) {
                 hasError = true;
                 return;
             }
         }
 
-        itemsToSave.push({ id: uid(), saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
+        // सभी आइटम एक ही बिल नंबर (generatedBillNo) के साथ सेव होंगे
+        itemsToSave.push({ id: uid(), bill_no: generatedBillNo, saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
     });
 
     if (hasError) {
@@ -503,11 +506,11 @@ function saveBikriMulti() {
     }
 
     const bikriItems = DB.get(KEYS.bikri);
-    // सभी आइटम्स को सेव करना
+    // सभी आइटम्स को अलग-अलग एंट्री के तौर पर सेव करना
     itemsToSave.forEach(item => bikriItems.unshift(item));
     
     DB.set(KEYS.bikri, bikriItems);
-    DB.set(KEYS.kharid, kharidItems); // स्टॉक अपडेट
+    DB.set(KEYS.kharid, kharidItems); // खरीद का स्टॉक कम करना
 
     closeModal(); 
     renderContent();
@@ -515,7 +518,6 @@ function saveBikriMulti() {
 
 // ── UDHAR ────────────────────────────────────────────────────────────
 function renderUdhar() {
-  // तारीख के हिसाब से सॉर्टिंग
   const items = DB.get(KEYS.udhar).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total=items.reduce((s,i)=>s+(+i.rakam||0),0);
   const baki=items.reduce((s,i)=>s+(i.baki||0),0);
