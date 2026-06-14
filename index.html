@@ -172,12 +172,12 @@ function closeModal() {
   document.getElementById('modalContainer').innerHTML = '';
 }
 
-// ── KHARID (खरीद) ───────────────────────────────────────────────────
+// ── KHARID (मल्टी-आइटम बिलिंग) ───────────────────────────────────────────────────
 let _kharidImg = null;
 let _editKharidId = null;
+let kharidRowCount = 1;
 
 function renderKharid() {
-  // तारीख के हिसाब से सॉर्टिंग (आज की डेट सबसे ऊपर)
   const items = DB.get(KEYS.kharid).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total = items.reduce((s,i) => s + (+i.kul||0), 0);
   let html = `
@@ -186,7 +186,7 @@ function renderKharid() {
         <div style="font-size:12px;color:#64748b">कुल खरीद (स्टॉक वैल्यू)</div>
         <div style="font-size:22px;font-weight:800;color:#2563eb">${fMoney(total)}</div>
       </div>
-      <button class="btn" style="background:#2563eb;color:#fff" onclick="openKharidForm()">+ नई खरीद</button>
+      <button class="btn" style="background:#2563eb;color:#fff" onclick="openKharidForm()">+ नया बिल दर्ज करें</button>
     </div>`;
     
   if (!items.length) {
@@ -246,37 +246,88 @@ function showKharidImg(id) {
 
 function openKharidForm(id = null) {
   _editKharidId = id; 
-  let item = null;
-  if (id) { item = DB.get(KEYS.kharid).find(i => i.id === id); _kharidImg = item.img || null; } else { _kharidImg = null; }
-  showModal('kharid', id ? 'खरीद एडिट करें' : 'नई खरीद दर्ज करें', `
-    <div class="field"><label>सामान का नाम *</label><input id="k_saman" placeholder="जैसे: बैटरी, स्पार्क प्लग..." value="${item ? item.saman : ''}" /></div>
-    <div class="field"><label>सप्लायर / दुकान का नाम</label><input id="k_supplier" placeholder="सप्लायर का नाम" value="${item && item.supplier ? item.supplier : ''}" /></div>
-    <div class="grid2">
-      <div class="field"><label>मात्रा *</label><input id="k_qty" type="number" placeholder="0" oninput="calcKharid()" value="${item ? item.qty : ''}" /></div>
-      <div class="field"><label>इकाई</label><input id="k_unit" placeholder="पीस, पैकेट..." value="${item && item.unit ? item.unit : ''}" /></div>
-    </div>
-    <div class="grid2">
-      <div class="field"><label>दर (₹)</label><input id="k_rate" type="number" placeholder="0" oninput="calcKharid()" value="${item && item.rate ? item.rate : ''}" /></div>
-      <div class="field"><label>कुल राशि (₹)</label><input id="k_kul" type="number" placeholder="0" value="${item && item.kul ? item.kul : ''}" /></div>
-    </div>
-    <div class="grid2">
-      <div class="field"><label>तारीख</label><input id="k_tarikh" type="date" value="${item ? item.tarikh : today()}" /></div>
-      <div class="field"><label>बिल नंबर</label><input id="k_billno" placeholder="INV-001" value="${item && item.billno ? item.billno : ''}" /></div>
-    </div>
-    <div class="field">
-      <label>बिल की फोटो अपलोड करें</label>
-      <div class="img-upload" id="kImgBox" onclick="document.getElementById('kFileInput').click()">
-        <div id="kImgPreview" style="color:#2563eb">
-          ${_kharidImg ? `<img src="${_kharidImg}" style="max-height:110px;border-radius:8px" />` : `<div style="font-size:28px">📷</div><div style="font-size:12px">बिल की फोटो लें या चुनें (वैकल्पिक)</div>`}
-        </div>
+  
+  if (id) { 
+    // ✏️ EDIT MODE (सिंगल आइटम एडिट करने के लिए)
+    let item = DB.get(KEYS.kharid).find(i => i.id === id); 
+    _kharidImg = item.img || null; 
+    showModal('kharid', 'खरीद अपडेट करें', `
+      <div class="field"><label>सामान का नाम *</label><input id="k_saman" value="${item.saman}" /></div>
+      <div class="field"><label>सप्लायर / दुकान का नाम</label><input id="k_supplier" value="${item.supplier || ''}" /></div>
+      <div class="grid2">
+        <div class="field"><label>मात्रा *</label><input id="k_qty" type="number" oninput="calcKharidSingle()" value="${item.qty}" /></div>
+        <div class="field"><label>इकाई</label><input id="k_unit" value="${item.unit || ''}" /></div>
       </div>
-      <input type="file" id="kFileInput" accept="image/*" style="display:none" onchange="handleKharidImg(event)" />
-    </div>
-    <div class="field"><label>नोट</label><input id="k_note" placeholder="अतिरिक्त जानकारी..." value="${item && item.note ? item.note : ''}" /></div>
-    <div class="flex-gap">
-      <button class="btn" style="background:#2563eb;color:#fff" onclick="saveKharid()">${id ? 'अपडेट करें' : 'सेव करें'}</button>
-      <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
-    </div>`);
+      <div class="grid2">
+        <div class="field"><label>दर (₹)</label><input id="k_rate" type="number" oninput="calcKharidSingle()" value="${item.rate || ''}" /></div>
+        <div class="field"><label>कुल राशि (₹)</label><input id="k_kul" type="number" value="${item.kul || ''}" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>तारीख</label><input id="k_tarikh" type="date" value="${item.tarikh}" /></div>
+        <div class="field"><label>बिल नंबर</label><input id="k_billno" value="${item.billno || ''}" /></div>
+      </div>
+      <div class="field">
+        <label>बिल की फोटो (अपडेट करें)</label>
+        <div class="img-upload" id="kImgBox" onclick="document.getElementById('kFileInput').click()">
+          <div id="kImgPreview" style="color:#2563eb">
+            ${_kharidImg ? `<img src="${_kharidImg}" style="max-height:110px;border-radius:8px" />` : `<div style="font-size:28px">📷</div><div style="font-size:12px">फोटो बदलें (वैकल्पिक)</div>`}
+          </div>
+        </div>
+        <input type="file" id="kFileInput" accept="image/*" style="display:none" onchange="handleKharidImg(event)" />
+      </div>
+      <div class="field"><label>नोट</label><input id="k_note" value="${item.note || ''}" /></div>
+      <div class="flex-gap">
+        <button class="btn" style="background:#2563eb;color:#fff;flex:1;" onclick="updateKharid()">अपडेट करें</button>
+        <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
+      </div>`);
+  } else { 
+    // ➕ ADD MODE (मल्टी-आइटम बिलिंग के लिए)
+    _kharidImg = null; 
+    kharidRowCount = 1;
+    showModal('kharid', 'नया खरीद बिल दर्ज करें', `
+      <div class="field"><label>सप्लायर / दुकान का नाम</label><input id="k_supplier" placeholder="सप्लायर का नाम (जैसे: B.K. Enterprises)" /></div>
+      <div class="grid2">
+        <div class="field"><label>बिल नंबर</label><input id="k_billno" placeholder="INV-001" /></div>
+        <div class="field"><label>तारीख</label><input id="k_tarikh" type="date" value="${today()}" /></div>
+      </div>
+      
+      <div id="k_items_container">
+          <div class="k-item-row" id="k_row_1" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                  <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम 1</span>
+              </div>
+              <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="k_saman" placeholder="जैसे: Foot rest, Chain set..." /></div>
+              <div class="grid2" style="margin-bottom:8px;">
+                <div class="field" style="margin-bottom:0;"><label>मात्रा *</label><input class="k_qty" type="number" placeholder="0" oninput="calcKharidRow(1)" /></div>
+                <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="k_unit" placeholder="पीस, पैकेट..." /></div>
+              </div>
+              <div class="grid2" style="margin-bottom:0;">
+                <div class="field" style="margin-bottom:0;"><label>खरीद दर (₹)</label><input class="k_rate" type="number" placeholder="0" oninput="calcKharidRow(1)" /></div>
+                <div class="field" style="margin-bottom:0;"><label>कुल (₹)</label><input class="k_kul" type="number" placeholder="0" readonly style="background:#e2e8f0;" /></div>
+              </div>
+          </div>
+      </div>
+
+      <button class="btn btn-sm btn-outline" style="width:100%; margin-bottom:15px; border-style:dashed; color:#475569;" onclick="addKharidRow()">+ एक और आइटम जोड़ें</button>
+
+      <div style="font-weight:bold; text-align:right; margin-bottom:15px; font-size:18px; padding:10px; background:#eff6ff; border-radius:8px; border:1px solid #2563eb40;">
+          कुल बिल: <span id="k_grand_total" style="color:#2563eb;">₹0.00</span>
+      </div>
+
+      <div class="field">
+        <label>बिल की फोटो अपलोड करें (एक बार)</label>
+        <div class="img-upload" id="kImgBox" onclick="document.getElementById('kFileInput').click()">
+          <div id="kImgPreview" style="color:#2563eb"><div style="font-size:28px">📷</div><div style="font-size:12px">पूरे बिल की फोटो लें या चुनें</div></div>
+        </div>
+        <input type="file" id="kFileInput" accept="image/*" style="display:none" onchange="handleKharidImg(event)" />
+      </div>
+      <div class="field"><label>नोट</label><input id="k_note" placeholder="बिल का विवरण..." /></div>
+
+      <div class="flex-gap">
+        <button class="btn" style="background:#2563eb;color:#fff; flex:1;" onclick="saveKharidMulti()">बिल सेव करें</button>
+        <button class="btn btn-outline" style="color:#64748b;border-color:#64748b" onclick="closeModal()">रद्द करें</button>
+      </div>`);
+  }
 }
 
 function handleKharidImg(e) {
@@ -286,32 +337,130 @@ function handleKharidImg(e) {
   reader.readAsDataURL(file);
 }
 
-function calcKharid() {
+function addKharidRow() {
+    kharidRowCount++;
+    const container = document.getElementById('k_items_container');
+    const rowHtml = `
+        <div class="k-item-row" id="k_row_${kharidRowCount}" style="background:#f8fafc; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #e2e8f0; position:relative;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                <span style="font-size:12px; font-weight:bold; color:#2563eb;">📦 आइटम ${kharidRowCount}</span>
+                <button onclick="document.getElementById('k_row_${kharidRowCount}').remove(); calcKharidGrandTotal();" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:20px; line-height:1; font-weight:bold;">×</button>
+            </div>
+            <div class="field" style="margin-bottom:8px;"><label>सामान का नाम *</label><input class="k_saman" placeholder="जैसे: Bag, Flasher..." /></div>
+            <div class="grid2" style="margin-bottom:8px;">
+              <div class="field" style="margin-bottom:0;"><label>मात्रा *</label><input class="k_qty" type="number" placeholder="0" oninput="calcKharidRow(${kharidRowCount})" /></div>
+              <div class="field" style="margin-bottom:0;"><label>इकाई</label><input class="k_unit" placeholder="पीस, पैकेट..." /></div>
+            </div>
+            <div class="grid2" style="margin-bottom:0;">
+              <div class="field" style="margin-bottom:0;"><label>खरीद दर (₹)</label><input class="k_rate" type="number" placeholder="0" oninput="calcKharidRow(${kharidRowCount})" /></div>
+              <div class="field" style="margin-bottom:0;"><label>कुल (₹)</label><input class="k_kul" type="number" placeholder="0" readonly style="background:#e2e8f0;" /></div>
+            </div>
+        </div>`;
+    container.insertAdjacentHTML('beforeend', rowHtml);
+}
+
+function calcKharidRow(id) {
+    const row = document.getElementById(`k_row_${id}`);
+    if(!row) return;
+    const q = +row.querySelector('.k_qty').value || 0;
+    const r = +row.querySelector('.k_rate').value || 0;
+    row.querySelector('.k_kul').value = (q * r).toFixed(2);
+    calcKharidGrandTotal();
+}
+
+function calcKharidGrandTotal() {
+    let grandTotal = 0;
+    document.querySelectorAll('.k_kul').forEach(input => {
+        grandTotal += (+input.value || 0);
+    });
+    document.getElementById('k_grand_total').innerText = '₹' + grandTotal.toFixed(2);
+}
+
+function calcKharidSingle() {
   const q = +document.getElementById('k_qty')?.value||0;
   const r = +document.getElementById('k_rate')?.value||0;
   if(q && r) document.getElementById('k_kul').value = (q*r).toFixed(2);
 }
 
-function saveKharid() {
+function saveKharidMulti() {
+    const supplier = document.getElementById('k_supplier').value.trim();
+    const billno = document.getElementById('k_billno').value.trim();
+    const tarikh = document.getElementById('k_tarikh').value;
+    const note = document.getElementById('k_note').value.trim();
+
+    const rows = document.querySelectorAll('.k-item-row');
+    let itemsToSave = [];
+    let hasError = false;
+
+    rows.forEach(row => {
+        const saman = row.querySelector('.k_saman').value.trim();
+        const qty = row.querySelector('.k_qty').value.trim();
+        const unit = row.querySelector('.k_unit').value.trim();
+        const rate = row.querySelector('.k_rate').value.trim();
+        const kul = row.querySelector('.k_kul').value.trim();
+
+        if (!saman || !qty) {
+            hasError = true;
+            return;
+        }
+        
+        itemsToSave.push({ id: uid(), saman, supplier, qty, unit, rate, kul, tarikh, billno, note, img: _kharidImg });
+    });
+
+    if (hasError) {
+        if (itemsToSave.length === 0) alert('कृपया सभी सामान का नाम और मात्रा सही से भरें।');
+        return; 
+    }
+
+    if (itemsToSave.length === 0) {
+        alert('कम से कम एक आइटम जोड़ें!');
+        return;
+    }
+
+    let items = DB.get(KEYS.kharid);
+    // सभी आइटम्स को अलग-अलग एंट्री के तौर पर सेव करना
+    itemsToSave.forEach(item => items.unshift(item));
+    
+    DB.set(KEYS.kharid, items);
+    _kharidImg = null;
+    closeModal(); 
+    renderContent();
+}
+
+function updateKharid() {
   const saman = document.getElementById('k_saman').value.trim();
   const qty = document.getElementById('k_qty').value.trim();
   if (!saman || !qty) { alert('सामान का नाम और मात्रा जरूरी है'); return; }
+  
   let items = DB.get(KEYS.kharid);
-  const newItemData = { 
-    id: _editKharidId || uid(), saman, supplier: document.getElementById('k_supplier').value, 
-    qty, unit: document.getElementById('k_unit').value, rate: document.getElementById('k_rate').value, 
-    kul: document.getElementById('k_kul').value, tarikh: document.getElementById('k_tarikh').value, 
-    billno: document.getElementById('k_billno').value, note: document.getElementById('k_note').value, img: _kharidImg 
+  
+  const updatedItem = { 
+    id: _editKharidId, 
+    saman, 
+    supplier: document.getElementById('k_supplier').value, 
+    qty, 
+    unit: document.getElementById('k_unit').value, 
+    rate: document.getElementById('k_rate').value, 
+    kul: document.getElementById('k_kul').value, 
+    tarikh: document.getElementById('k_tarikh').value, 
+    billno: document.getElementById('k_billno').value, 
+    note: document.getElementById('k_note').value, 
+    img: _kharidImg 
   };
-  if (_editKharidId) { items = items.map(i => i.id === _editKharidId ? newItemData : i); } else { items.unshift(newItemData); }
-  DB.set(KEYS.kharid, items); _kharidImg = null; _editKharidId = null; closeModal(); renderContent();
+
+  items = items.map(i => i.id === _editKharidId ? updatedItem : i);
+  
+  DB.set(KEYS.kharid, items);
+  _kharidImg = null;
+  _editKharidId = null;
+  closeModal(); 
+  renderContent();
 }
 
 // ── BIKRI (मल्टी-आइटम बिलिंग) ────────────────────────────────────────────────────────────
 let bikriRowCount = 1;
 
 function renderBikri() {
-  // तारीख के हिसाब से सॉर्टिंग
   const items = DB.get(KEYS.bikri).sort((a, b) => new Date(b.tarikh) - new Date(a.tarikh));
   const total = items.reduce((s,i)=>s+(+i.kul||0),0);
   const naqad = items.filter(i=>i.bhugtan==='naqad').reduce((s,i)=>s+(+i.kul||0),0);
@@ -450,7 +599,6 @@ function saveBikriMulti() {
     const tarikh = document.getElementById('b_tarikh').value;
     const note = document.getElementById('b_note').value.trim();
     
-    // एक नया ऑटोमैटिक बिल नंबर जनरेट करना
     const generatedBillNo = 'INV-' + Math.floor(1000 + Math.random() * 9000);
 
     const rows = document.querySelectorAll('.b-item-row');
@@ -491,7 +639,6 @@ function saveBikriMulti() {
             }
         }
 
-        // सभी आइटम एक ही बिल नंबर (generatedBillNo) के साथ सेव होंगे
         itemsToSave.push({ id: uid(), bill_no: generatedBillNo, saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
     });
 
@@ -506,11 +653,10 @@ function saveBikriMulti() {
     }
 
     const bikriItems = DB.get(KEYS.bikri);
-    // सभी आइटम्स को अलग-अलग एंट्री के तौर पर सेव करना
     itemsToSave.forEach(item => bikriItems.unshift(item));
     
     DB.set(KEYS.bikri, bikriItems);
-    DB.set(KEYS.kharid, kharidItems); // खरीद का स्टॉक कम करना
+    DB.set(KEYS.kharid, kharidItems); 
 
     closeModal(); 
     renderContent();
