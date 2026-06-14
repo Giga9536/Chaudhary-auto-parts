@@ -1,0 +1,31 @@
+{
+  "name": "दुकान हिसाब",
+  "short_name": "दुकान हिसाब",
+  "description": "दुकान का पूरा हिसाब-किताब एक जगह",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#1e40af",
+  "orientation": "portrait",
+  "lang": "hi",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business"],
+  "shortcuts": [
+    { "name": "नई खरीद", "url": "/?tab=kharid", "description": "नई खरीद दर्ज करें" },
+    { "name": "नई बिक्री", "url": "/?tab=bikri", "description": "नई बिक्री दर्ज करें" },
+    { "name": "उधार", "url": "/?tab=udhar", "description": "उधार देखें" }
+  ]
+}
