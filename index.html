@@ -390,7 +390,6 @@ function saveKharidMulti() {
 
     const rows = document.querySelectorAll('.k-item-row');
     let itemsToSave = [];
-    let hasError = false;
 
     rows.forEach(row => {
         const saman = row.querySelector('.k_saman').value.trim();
@@ -399,26 +398,21 @@ function saveKharidMulti() {
         const rate = row.querySelector('.k_rate').value.trim();
         const kul = row.querySelector('.k_kul').value.trim();
 
+        // 🟢 स्मार्ट फीचर: अगर कोई खाली रो (Row) मिल जाए, तो उसे छोड़ दो और आगे बढ़ो
         if (!saman || !qty) {
-            hasError = true;
-            return;
+            return; 
         }
         
         itemsToSave.push({ id: uid(), saman, supplier, qty, unit, rate, kul, tarikh, billno, note, img: _kharidImg });
     });
 
-    if (hasError) {
-        if (itemsToSave.length === 0) alert('कृपया सभी सामान का नाम और मात्रा सही से भरें।');
+    // अगर सारे के सारे खाली निकले, तब ही एरर दिखाओ
+    if (itemsToSave.length === 0) {
+        alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
         return; 
     }
 
-    if (itemsToSave.length === 0) {
-        alert('कम से कम एक आइटम जोड़ें!');
-        return;
-    }
-
     let items = DB.get(KEYS.kharid);
-    // सभी आइटम्स को अलग-अलग एंट्री के तौर पर सेव करना
     itemsToSave.forEach(item => items.unshift(item));
     
     DB.set(KEYS.kharid, items);
@@ -604,7 +598,6 @@ function saveBikriMulti() {
     const rows = document.querySelectorAll('.b-item-row');
     let itemsToSave = [];
     let kharidItems = DB.get(KEYS.kharid);
-    let hasError = false;
 
     rows.forEach(row => {
         const saman = row.querySelector('.b_saman').value.trim();
@@ -613,43 +606,34 @@ function saveBikriMulti() {
         const rate = row.querySelector('.b_rate').value.trim();
         const kul = row.querySelector('.b_kul').value.trim();
 
+        // 🟢 स्मार्ट फीचर: खाली रो को छोड़ दें
         if (!saman || !qty) {
-            hasError = true;
             return;
         }
         
         const saleQty = Number(qty);
-        let stockFound = false;
         let stockItem = kharidItems.find(k => k.saman.toLowerCase() === saman.toLowerCase());
         
         if (stockItem) {
             let currentStock = Number(stockItem.qty);
             if (currentStock < saleQty) {
                 if(!confirm(`चेतावनी: '${saman}' का स्टॉक केवल ${currentStock} बचे हैं! क्या आप फिर भी बेचना चाहते हैं?`)) {
-                    hasError = true;
-                    return;
+                    return; 
                 }
             }
             stockItem.qty = currentStock - saleQty;
-            stockFound = true;
         } else {
             if(!confirm(`'${saman}' स्टॉक में नहीं मिला। क्या आप फिर भी इसे बिल में जोड़ना चाहते हैं?`)) {
-                hasError = true;
-                return;
+                return; 
             }
         }
 
         itemsToSave.push({ id: uid(), bill_no: generatedBillNo, saman, grahak, qty: saleQty, unit, rate, kul, bhugtan, tarikh, note });
     });
 
-    if (hasError) {
-        if (itemsToSave.length === 0) alert('कृपया सभी सामान का नाम और मात्रा सही से भरें।');
-        return; 
-    }
-
     if (itemsToSave.length === 0) {
-        alert('कम से कम एक आइटम जोड़ें!');
-        return;
+        alert('कृपया कम से कम एक सामान का नाम और मात्रा ज़रूर भरें!');
+        return; 
     }
 
     const bikriItems = DB.get(KEYS.bikri);
